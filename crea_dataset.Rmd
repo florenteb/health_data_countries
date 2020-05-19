@@ -1,0 +1,114 @@
+---
+title: "PRA2: Generación del dataset"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Carga de los ficheros
+
+Vamos a cargar el fichero sobre los sistemas de salud de los distintos países:
+https://www.kaggle.com/danevans/world-bank-wdi-212-health-systems
+
+Y el fichero sobre la información general de los países:
+https://www.kaggle.com/fernandol/countries-of-the-world
+
+```{r message= FALSE, warning=FALSE}
+# Cargamos los datos de salud
+health_data<-read.csv("./2.12_Health_systems.csv",header=T,sep=",", stringsAsFactors=FALSE)
+
+# Cargamos la información general
+country_data<-read.csv("./countries.csv",header=T,sep=",", stringsAsFactors=FALSE)
+# Eliminamos los espacios en blanco que contiene el atributo Country
+country_data$Country <- substr(country_data$Country,1,nchar(country_data$Country)-1)
+```
+
+Vamos a cruzar los dos datasets por el campo País (World_Bank_Name y Country):
+
+```{r message=FALSE, warning=FALSE}
+# Cruzamos y almacenamos en data
+data = merge(x=health_data,y=country_data, by.x="World_Bank_Name", by.y="Country", all=TRUE, suffixes=c("h.", "c."))
+
+setdiff(health_data$World_Bank_Name, country_data$Country)
+setdiff(country_data$Country, health_data$World_Bank_Name)
+
+# Al cruzar ambos datasets por el país, nos encontramos con que existen nombres
+# de países que no cruzan, por lo que vamos a analizarlos
+
+# Almacenamos en h aquellos paises de health_data que no están en country_data
+h <- data.frame ("h", setdiff(health_data$World_Bank_Name, country_data$Country))
+# Almacenamos en caquellos paises de country_data que no están en health_data
+c <- data.frame ("c", setdiff(country_data$Country, health_data$World_Bank_Name))
+
+# Agrupamos en un único dataset df
+colnames(h) <- c("s","v")
+colnames(c) <- c("s","v")
+df_nojoin <- rbind(h,c)
+df_nojoin$v <- as.character(df_nojoin$v)
+
+
+# Vamos a probar si con fuzzy join podemos resolver los cruces pendientes
+# Renombramos el atributo ya que el método que vamos a utilizar requiere
+# que el nombre sea el mismo en los dos datasets
+colnames(health_data)[colnames(health_data) == 'World_Bank_Name'] <- 'Country'
+
+# Instalamos y cargamos la librería
+# install.packages("fuzzyjoin")
+library(fuzzyjoin)
+
+# Realizamos varias pruebas sin éxito: pocos cruces adicionales
+# y algunos errores
+df_fuzzy <- stringdist_inner_join(h, c,
+     by ="v", method="lcs", max_dist=6 )
+
+# Por lo que realizamos el cambio manualmente
+country_data$Country[country_data$Country=='Antigua & Barbuda']<-'Antigua and Barbuda'
+country_data$Country[country_data$Country=='Bosnia & Herzegovina']<-'Bosnia and Herzegovina'
+country_data$Country[country_data$Country=='Brunei']<-'Brunei Darussalam'
+country_data$Country[country_data$Country=='Cape Verde']<-'Cabo Verde'
+country_data$Country[country_data$Country=='Central African Rep.']<-'Central African Republic'
+country_data$Country[country_data$Country=='Jersey']<-'Channel Islands'
+country_data$Country[country_data$Country=='Congo, Repub. of the']<-'Congo, Rep.'
+country_data$Country[country_data$Country=='Egypt']<-'Egypt, Arab Rep.'
+country_data$Country[country_data$Country=='Swaziland']<-'Eswatini'
+country_data$Country[country_data$Country=='Hong Kong']<-'Hong Kong SAR, China'
+country_data$Country[country_data$Country=='Iran']<-'Iran, Islamic Rep.'
+country_data$Country[country_data$Country=='Korea, North']<-'Korea, Dem. People\'s Rep.'
+country_data$Country[country_data$Country=='Korea, South']<-'Korea, Rep.'
+country_data$Country[country_data$Country=='Kyrgyzstan']<-'Kyrgyz Republic'
+country_data$Country[country_data$Country=='Laos']<-'Lao PDR'
+country_data$Country[country_data$Country=='Macau']<-'Macao SAR, China'
+country_data$Country[country_data$Country=='Micronesia, Fed. St.']<-'Micronesia, Fed. Sts.'
+country_data$Country[country_data$Country=='Macedonia']<-'North Macedonia'
+country_data$Country[country_data$Country=='N. Mariana Islands']<-'Northern Mariana Islands'
+country_data$Country[country_data$Country=='Russia']<-'Russian Federation'
+country_data$Country[country_data$Country=='Sao Tome & Principe']<-'Sao Tome and Principe'
+country_data$Country[country_data$Country=='Slovakia']<-'Slovak Republic'
+country_data$Country[country_data$Country=='Saint Kitts & Nevis']<-'St. Kitts and Nevis'
+country_data$Country[country_data$Country=='Saint Lucia']<-'St. Lucia'
+country_data$Country[country_data$Country=='Saint Vincent and the Grenadines']<-'St. Vincent and the Grenadines'
+country_data$Country[country_data$Country=='Syria']<-'Syrian Arab Republic'
+country_data$Country[country_data$Country=='East Timor']<-'Timor-Leste'
+country_data$Country[country_data$Country=='Trinidad & Tobago']<-'Trinidad and Tobago'
+country_data$Country[country_data$Country=='Turks & Caicos Is']<-'Turks and Caicos Islands'
+country_data$Country[country_data$Country=='Venezuela']<-'Venezuela, RB'
+country_data$Country[country_data$Country=='Virgin Islands']<-'Virgin Islands (U.S.)'
+country_data$Country[country_data$Country=='West Bank']<-'West Bank and Gaza'
+country_data$Country[country_data$Country=='Yemen']<-'Yemen, Rep.'
+
+# Ahora sí, realizamos el cruce y éste contendrá prácticamente toda la información
+# del dataset country_data (siguen faltando algunos paises).
+data = merge(x=health_data,y=country_data, by="Country", all.x=TRUE, suffixes=c("h.", "c."))
+
+# Eliminamos estas dos columnas al ser repetitivas y no aportar información
+data <- data[, !(names(data) %in% c("Country_Region", "Province_State"))]
+
+```
+
+Almacenamos el dataset generado en un fichero csv:
+```{r message= FALSE, warning=FALSE}
+# Escribimos el fichero
+write.csv(data, file = "health_country_data.csv")
+```
