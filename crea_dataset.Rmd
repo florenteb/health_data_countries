@@ -21,14 +21,18 @@ health_data<-read.csv("./2.12_Health_systems.csv",header=T,sep=",", stringsAsFac
 
 # Cargamos la información general
 country_data<-read.csv("./countries.csv",header=T,sep=",", stringsAsFactors=FALSE)
+
+# Añadimos los datos del covid de https://www.worldometers.info/coronavirus/#countries
+covid_data<-read.csv("./worldometers_covid_20200524.csv",header=T,sep=";", stringsAsFactors=FALSE)
+
 # Eliminamos los espacios en blanco que contiene el atributo Country
 country_data$Country <- substr(country_data$Country,1,nchar(country_data$Country)-1)
 ```
 
-Vamos a cruzar los dos datasets por el campo País (World_Bank_Name y Country):
+Vamos a cruzar health_data y country_data por el campo País (World_Bank_Name y Country):
 
 ```{r message=FALSE, warning=FALSE}
-# Cruzamos y almacenamos en data
+# Cruzamos health_data y country_data por el campo País (World_Bank_Name y Country) y almacenamos en data
 data = merge(x=health_data,y=country_data, by.x="World_Bank_Name", by.y="Country", all=TRUE, suffixes=c("h.", "c."))
 
 setdiff(health_data$World_Bank_Name, country_data$Country)
@@ -104,6 +108,65 @@ data = merge(x=health_data,y=country_data, by="Country", all.x=TRUE, suffixes=c(
 
 # Eliminamos estas dos columnas al ser repetitivas y no aportar información
 data <- data[, !(names(data) %in% c("Country_Region", "Province_State"))]
+
+
+
+
+for (n in 2:ncol(covid_data)){ 
+      covid_data[,n] <- gsub(",", "", covid_data[,n])
+      covid_data[,n] <- as.double(covid_data[,n])
+}
+
+# Vuelve a haber paises que no cruzan
+setdiff(data$Country, covid_data$Country)
+setdiff(covid_data$Country, data$Country)
+
+# Almacenamos en h aquellos paises de health_data que no están en country_data
+d <- data.frame ("d", setdiff(data$Country, covid_data$Country))
+# Almacenamos en caquellos paises de country_data que no están en health_data
+c <- data.frame ("c", setdiff(covid_data$Country, data$Country))
+
+# Agrupamos en un único dataset df
+colnames(d) <- c("s","v")
+colnames(c) <- c("s","v")
+df_nojoin <- rbind(d,c)
+df_nojoin$v <- as.character(df_nojoin$v)
+
+# Repetimos limpieza
+covid_data$Country[covid_data$Country=='Bahamas']<-'Bahamas, The'
+covid_data$Country[covid_data$Country=='Brunei ']<-'Brunei Darussalam'
+covid_data$Country[covid_data$Country=='CAR']<-'Central African Republic'
+covid_data$Country[covid_data$Country=='Ivory Coast']<-'Cote d\'Ivoire'
+covid_data$Country[covid_data$Country=='Czechia']<-'Czech Republic'
+covid_data$Country[covid_data$Country=='Egypt']<-'Egypt, Arab Rep.'
+covid_data$Country[covid_data$Country=='Faeroe Islands']<-'Faroe Islands'
+covid_data$Country[covid_data$Country=='Gambia']<-'Gambia, The'
+covid_data$Country[covid_data$Country=='Hong Kong']<-'Hong Kong SAR, China'
+covid_data$Country[covid_data$Country=='Iran']<-'Iran, Islamic Rep.'
+covid_data$Country[covid_data$Country=='S. Korea']<-'Korea, Rep.'
+covid_data$Country[covid_data$Country=='Kyrgyzstan']<-'Kyrgyz Republic'
+covid_data$Country[covid_data$Country=='Laos']<-'Lao PDR'
+covid_data$Country[covid_data$Country=='Macao']<-'Macao SAR, China'
+covid_data$Country[covid_data$Country=='Russia']<-'Russian Federation'
+covid_data$Country[covid_data$Country=='Sint Maarten']<-'Sint Maarten (Dutch part)'
+covid_data$Country[covid_data$Country=='Slovakia']<-'Slovak Republic'
+covid_data$Country[covid_data$Country=='Saint Kitts and Nevis']<-'St. Kitts and Nevis'
+covid_data$Country[covid_data$Country=='Saint Lucia']<-'St. Lucia'
+covid_data$Country[covid_data$Country=='Saint Martin']<-'St. Martin (French part)'
+covid_data$Country[covid_data$Country=='St. Vincent Grenadines']<-'St. Vincent and the Grenadines'
+covid_data$Country[covid_data$Country=='Syria']<-'Syrian Arab Republic'
+covid_data$Country[covid_data$Country=='Turks and Caicos']<-'Turks and Caicos Islands'
+covid_data$Country[covid_data$Country=='UAE']<-'United Arab Emirates'
+covid_data$Country[covid_data$Country=='UK']<-'United Kingdom'
+covid_data$Country[covid_data$Country=='USA']<-'United States'
+covid_data$Country[covid_data$Country=='Venezuela']<-'Venezuela, RB'
+covid_data$Country[covid_data$Country=='British Virgin Islands']<-'Virgin Islands (U.S.)'
+covid_data$Country[covid_data$Country=='Yemen']<-'Yemen, Rep.'
+covid_data$Country[covid_data$Country=='Congo']<-'Congo, Rep.'
+covid_data$Country[covid_data$Country=='DRC']<-'Congo, Dem. Rep.'
+covid_data$Country[covid_data$Country=='Palestine']<-'West Bank and Gaza'
+
+data = merge(x=data,y=covid_data, by="Country", all.x=TRUE, suffixes=c("d.", "cv."))
 
 ```
 
