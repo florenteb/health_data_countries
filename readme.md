@@ -1,3 +1,5 @@
+# Relación entre muertes por COVID-19 y desarrollo de los países
+
 El objetivo del siguiente trabajo es averiguar si existe relación entre el gasto sanitario por pais y el impacto en número de muertos producidos por el COVID-19.
 
 Para ello nos ayudamos de los datos publicados en kaggle:
