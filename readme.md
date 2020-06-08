@@ -14,9 +14,9 @@ El trabajo se ha realizado mediante cuaderno de Jupiter. El código puede ser de
 
  https://nbviewer.jupyter.org/github/florenteb/health_data_countries/blob/master/health_country.ipynb 
  
-La carpeta *ficheros_entrada* contiene los ficheros de entrada utilizados
-La carpeta *dataset* contiene el dataset final generado
+* La carpeta *ficheros_entrada* contiene los ficheros de entrada utilizados
+* La carpeta *dataset* contiene el dataset final generado
 
-Componentes del equipo:
+**Componentes del equipo:**
 * Jesús González Leal
 * Francisco Enrique Lorente Banegas
