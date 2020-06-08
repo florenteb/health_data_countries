@@ -13,3 +13,10 @@ Y de los datos de incidencia del COVID-19 publicados en Worldometer - https://ww
 El trabajo se ha realizado mediante cuaderno de Jupiter. El código puede ser descargado para su ejecución o puede verse directamente en el siguiente enlace:
 
  https://nbviewer.jupyter.org/github/florenteb/health_data_countries/blob/master/health_country.ipynb 
+ 
+La carpeta *ficheros_entrada* contiene los ficheros de entrada utilizados
+La carpeta *dataset* contiene el dataset final generado
+
+Componentes del equipo:
+* Jesús González Leal
+* Francisco Enrique Lorente Banegas
