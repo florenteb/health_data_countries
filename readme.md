@@ -20,3 +20,9 @@ El trabajo se ha realizado mediante cuaderno de Jupiter. El código puede ser de
 **Componentes del equipo:**
 * Jesús González Leal
 * Francisco Enrique Lorente Banegas
+
+| Contribuciones | Firma |
+|----------------|-------|
+| Investigación previa|JGL, FELB|
+| Redacción de las respuestas|JGL, FELB|
+| Desarrollo código|JGL, FELB|
